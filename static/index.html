@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Detection using Images</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom gradient background animation */
+        @keyframes gradientBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a, #1a1a1a);
+            background-size: 200% 200%;
+            animation: gradientBackground 10s ease infinite;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 6rem;
+        }
+        .glow:hover {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+        }
+        .transition-smooth {
+            transition: all 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .gradient-border {
+            border: 2px solid transparent;
+            background: linear-gradient(#1a1a1a, #1a1a1a) padding-box,
+                        linear-gradient(135deg, #f59e0b, #fbbf24) border-box;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #f59e0b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0;
+            background: rgba(42, 42, 42, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .nav-bar button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+            transition: all 0.3s ease-in-out;
+        }
+        .nav-bar button:hover {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: #f59e0b;
+        }
+        /* New styles for explanation boxes */
+        .explanation-box {
+            background: rgba(42, 42, 42, 0.8);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .explanation-box h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f59e0b;
+            margin-bottom: 0.5rem;
+        }
+        .explanation-box p {
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+        /* Modern card styling */
+        .card {
+            background: rgba(42, 42, 42, 0.8);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2);
+        }
+        /* Improved button styling */
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+    <div class="container mx-auto px-4 py-4 flex flex-col items-center">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-500 mb-2">
+                <i class="fas fa-fire text-yellow-500"></i> Fire Detection
+            </h1>
+            <p class="text-md text-gray-400">
+                Detect fire in images using a deep learning model.
+            </p>
+        </div>
+
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button onclick="showUploadSection()" class="btn-primary transition-smooth">
+                <i class="fas fa-upload"></i> Upload Image
+            </button>
+            <button onclick="showAnalysis()" class="btn-primary transition-smooth">
+                <i class="fas fa-chart-line"></i> Show Analysis
+            </button>
+        </div>
+
+        <!-- Upload and Prediction Section -->
+        <div id="upload-section" class="max-w-2xl w-full space-y-4">
+            <!-- Upload Form -->
+            <form id="upload-form" class="space-y-4">
+                <!-- File Upload Button -->
+                <label for="file-upload" class="cursor-pointer flex flex-col items-center justify-center p-6 border-2 border-dashed border-amber-500 rounded-xl bg-gray-800/50 hover:bg-gray-800/70 transition-smooth">
+                    <span class="text-xl text-gray-300 mb-2">📁 Upload Image</span>
+                    <span class="text-sm text-gray-400">(JPEG, PNG, etc.)</span>
+                    <input id="file-upload" type="file" name="file" accept="image/*" class="hidden" onchange="previewImage(event)">
+                </label>
+
+                <!-- Image Preview -->
+                <div class="mt-4">
+                    <img id="preview" class="hidden w-full h-48 object-cover rounded-xl shadow-2xl border-2 border-amber-500 transition-smooth">
+                </div>
+
+                <!-- Predict Button -->
+                <button
+                    id="predict-btn"
+                    type="submit"
+                    class="hidden w-full btn-primary glow transition-smooth">
+                    Predict Result
+                </button>
+            </form>
+
+            <!-- Result Container -->
+            <div id="result-container" class="hidden mt-4 p-4 bg-gray-800/50 rounded-xl gradient-border fade-in">
+                <p id="result-text" class="text-center text-gray-200 font-medium text-md"></p>
+            </div>
+        </div>
+
+        <!-- Analysis Section -->
+        <div id="analysis-section" class="hidden max-w-4xl w-full space-y-4">
+            <!-- Model Accuracy Label -->
+            <div class="text-center">
+                <h2 class="text-xl font-semibold text-amber-500 mb-2">Model Accuracy</h2>
+                <p id="accuracy" class="text-gray-200 font-medium text-md"></p>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="hidden flex justify-center items-center py-4">
+                <div class="loading-spinner"></div>
+            </div>
+
+            <!-- Analysis Results -->
+            <div id="analysis-results" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
+                <!-- Confusion Matrix -->
+                <div class="card">
+                    <h3 class="text-lg font-medium text-amber-500 mb-2">Confusion Matrix</h3>
+                    <p class="text-sm text-gray-400 mb-2">A confusion matrix shows the performance of the model by comparing predicted and actual values.</p>
+                    <img id="confusion-matrix" src="" alt="Confusion Matrix" class="w-full h-64 object-contain rounded-lg">
+                    <!-- Explanation for Confusion Matrix -->
+                    <div id="confusion-matrix-explanation" class="explanation-box">
+                        <h4>Confusion Matrix Explanation</h4>
+                        <p id="cm-explanation-text"></p>
+                    </div>
+                </div>
+
+                <!-- Training Loss Curve -->
+                <div class="card">
+                    <h3 class="text-lg font-medium text-amber-500 mb-2">Training Loss Curve</h3>
+                    <p class="text-sm text-gray-400 mb-2">The training loss curve shows how the model's loss decreases over time during training.</p>
+                    <img id="loss-curve" src="" alt="Training Loss Curve" class="w-full h-64 object-contain rounded-lg">
+                    <!-- Explanation for Loss Curve -->
+                    <div id="loss-curve-explanation" class="explanation-box">
+                        <h4>Loss Curve Explanation</h4>
+                        <p id="loss-explanation-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="developer-info">
+            <p class="text-gray-400">
+                Developed by
+                <a href="https://github.com/Om-Bhandwalkar02" target="_blank" class="font-semibold text-amber-500 hover:text-amber-600 transition-smooth">
+                    Om Bhandwalkar
+                </a>
+                <a href="https://github.com/Om-Bhandwalkar02" target="_blank" class="ml-2">
+                    <i class="fab fa-github text-xl text-gray-400 hover:text-amber-500 transition-smooth"></i>
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Toggle between upload and analysis sections
+        function showAnalysis() {
+            console.log("Show Analysis clicked");
+            document.getElementById('upload-section').classList.add('hidden');
+            document.getElementById('analysis-section').classList.remove('hidden');
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('analysis-results').classList.add('hidden');
+
+            fetchAnalysis(); // Fetch analysis data when the section is shown
+        }
+
+        function showUploadSection() {
+            console.log("Show Upload clicked");
+            document.getElementById('analysis-section').classList.add('hidden');
+            document.getElementById('upload-section').classList.remove('hidden');
+        }
+
+        // Image preview function
+        function previewImage(event) {
+            console.log("Image selected");
+            const reader = new FileReader();
+            reader.onload = function() {
+                const preview = document.getElementById('preview');
+                preview.src = reader.result;
+                preview.classList.remove('hidden');
+
+                document.getElementById('predict-btn').classList.remove('hidden');
+                document.getElementById('result-container').classList.add('hidden'); // Hide previous result
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        // Form submission for prediction
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            console.log("Form submitted");
+
+            const formData = new FormData(this);
+
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Prediction result:", data);
+                document.getElementById('result-container').classList.remove('hidden');
+                document.getElementById('result-text').innerText = data.result || "No result found";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById('result-container').classList.remove('hidden');
+                document.getElementById('result-text').innerText = "Error occurred while predicting.";
+            });
+        });
+
+        // Fetch analysis data
+        function fetchAnalysis() {
+            console.log("Fetching analysis data");
+            fetch("/analysis")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Analysis data:", data);
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                    document.getElementById('analysis-results').classList.remove('hidden');
+                    document.getElementById('accuracy').innerText = `Accuracy: ${(data.accuracy * 100).toFixed(2)}%`;
+                    document.getElementById('confusion-matrix').src = data.confusion_matrix;
+                    document.getElementById('cm-explanation-text').innerText = data.confusion_matrix_explanation;
+                    document.getElementById('loss-curve').src = data.loss_curve;
+                    document.getElementById('loss-explanation-text').innerText = data.loss_curve_explanation;
+                })
+                .catch(error => {
+                    console.error("Error fetching analysis:", error);
+                    alert("Failed to fetch analysis results. Please try again.");
+                });
+        }
+    </script>
+</body>
+</html>
