@@ -5,5 +5,5 @@
 #### ✅ Graphical analysis of results
 
 ![Home Page](image.png)
-![Dashboard](image2.png)
-![Ananlysis](image3.png)
+![Dashboard](image1.png)
+![Ananlysis](image2.png)
